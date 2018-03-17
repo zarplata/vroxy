@@ -66,7 +66,7 @@ func (queue *CommandQueue) deliver(
 		}
 		queue.ChunksCh <- VKCommandsChunk{
 			AccessToken: accessToken,
-			Commands: commands[:size],
+			Commands:    commands[:size],
 		}
 		commands = commands[size:]
 		delivered += size

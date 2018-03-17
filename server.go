@@ -1,8 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	"github.com/reconquest/hierr-go"
 	"net/http"
 )
@@ -23,25 +23,25 @@ func NewServer(commands chan<- VKCommand, verbose bool) *Server {
 }
 
 func (proxy *Server) Run(addr ...string) {
-	proxy.router.POST("/method/messages.send", proxy.handleMessagesSend)
+	proxy.router.POST("/method/:name", proxy.handleMessagesSend)
 	proxy.router.Run(addr...)
 }
 
 func (proxy *Server) handleMessagesSend(ctx *gin.Context) {
-	var args MessageSendCommandArgs
-	err := binding.Form.Bind(ctx.Request, &args)
-	if err != nil {
+	request := ctx.Request
+	if err := request.ParseForm(); err != nil {
 		abort(
 			ctx,
 			http.StatusBadRequest,
-			hierr.Errorf(err, "unable to bind form"),
+			hierr.Errorf(err, "unable to parse form data"),
 		)
 		return
 	}
+	request.ParseMultipartForm(32 << 10) // 32 MB
 	proxy.commands <- VKCommand{
 		AccessToken: ctx.Query("access_token"),
-		Method:      "API.messages.send",
-		Args:        args,
+		Method:      fmt.Sprintf("API.%s", ctx.Param("name")),
+		Args:        request.Form,
 	}
 	ctx.JSON(http.StatusOK, gin.H{"success": true})
 }

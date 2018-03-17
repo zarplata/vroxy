@@ -12,8 +12,8 @@ import (
 )
 
 type VKClient struct {
-	client      *http.Client
-	version     string
+	client  *http.Client
+	version string
 }
 
 type VKCommand struct {
@@ -29,11 +29,6 @@ type VKCommandsChunk struct {
 	Commands    []VKCommand
 }
 
-type MessageSendCommandArgs struct {
-	UserID  int    `json:"user_id" form:"user_id" binding:"required"`
-	Message string `json:"message" form:"message" binding:"required"`
-}
-
 type ExecuteResponsePayload struct {
 	Response []interface{} `json:"response"`
 }
@@ -45,8 +40,8 @@ func NewVKClient(rps int) *VKClient {
 	}}
 
 	return &VKClient{
-		client:      client,
-		version:     "5.73",
+		client:  client,
+		version: "5.73",
 	}
 }
 
