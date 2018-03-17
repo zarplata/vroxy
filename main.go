@@ -24,6 +24,7 @@ Usage:
 Options:
 	-l --listen <address>      HTTP listen address. [default: :8080]
 	-r --rps <rps>             Permissible VK API RPS. [default: 10]
+	-c --chunk-size	<count>    Chunk size. [default: 25]
 	-v --verbose               Logging in debug mode.
 `
 
@@ -42,7 +43,13 @@ Options:
 		hierr.Fatalf(err, "unable to parse --rps")
 	}
 
+	chunkSize, err := strconv.Atoi(arguments["--chunk-size"].(string))
+	if err != nil {
+		hierr.Fatalf(err, "unable to parse --chunk-size")
+	}
+
 	queue := NewCommandsQueue(rps)
+	queue.ChunkSize = chunkSize
 	queue.Run()
 
 	vk := NewVKClient(rps)
