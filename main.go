@@ -13,7 +13,10 @@ var logger *lorg.Log
 func main() {
 	usage := `vroxy ` + version + `
 
-Proxy server for balancing requests to VK API to avoid rate limiting.
+Proxy server for balancing a requests to VK API to avoid rate limit exceeded.
+
+Requests grouping to chunks and sends every seconds using Execute 
+method without the habit of rate limitations. 
 
 Usage:
     vroxy [options]
