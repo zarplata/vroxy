@@ -9,10 +9,10 @@ import (
 
 type Server struct {
 	router   *gin.Engine
-	commands chan<- Command
+	commands chan<- VKCommand
 }
 
-func NewServer(commands chan<- Command, verbose bool) *Server {
+func NewServer(commands chan<- VKCommand, verbose bool) *Server {
 	if !verbose {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -38,9 +38,10 @@ func (proxy *Server) handleMessagesSend(ctx *gin.Context) {
 		)
 		return
 	}
-	proxy.commands <- Command{
-		Method: "API.messages.send",
-		Args:   args,
+	proxy.commands <- VKCommand{
+		AccessToken: ctx.Query("access_token"),
+		Method:      "API.messages.send",
+		Args:        args,
 	}
 	ctx.JSON(http.StatusOK, gin.H{"success": true})
 }

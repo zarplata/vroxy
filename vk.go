@@ -12,17 +12,22 @@ import (
 )
 
 type VKClient struct {
-	AccessToken string
 	client      *http.Client
 	version     string
 }
 
-type Command struct {
-	Method string
-	Args   interface{}
+type VKCommand struct {
+	AccessToken string
+	Method      string
+	Args        interface{}
 }
 
-type Commands []Command
+type VKCommands []VKCommand
+
+type VKCommandsChunk struct {
+	AccessToken string
+	Commands    []VKCommand
+}
 
 type MessageSendCommandArgs struct {
 	UserID  int    `json:"user_id" form:"user_id" binding:"required"`
@@ -33,31 +38,30 @@ type ExecuteResponsePayload struct {
 	Response []interface{} `json:"response"`
 }
 
-func NewVKClient(accessToken string, rps int) *VKClient {
+func NewVKClient(rps int) *VKClient {
 	client := &http.Client{Transport: &http.Transport{
 		MaxIdleConnsPerHost: rps * 2,
 		MaxIdleConns:        rps * 2,
 	}}
 
 	return &VKClient{
-		AccessToken: accessToken,
 		client:      client,
 		version:     "5.73",
 	}
 }
 
-func (vk *VKClient) Run(chunks <-chan Commands) {
+func (vk *VKClient) Run(chunksCh <-chan VKCommandsChunk) {
 	go func() {
 		for {
 			select {
-			case commands := <-chunks:
-				go func(commands Commands) {
-					err, cnt := vk.execute(commands)
+			case chunk := <-chunksCh:
+				go func(chunk VKCommandsChunk) {
+					err, cnt := vk.execute(chunk.AccessToken, chunk.Commands)
 					if err != nil {
 						e := hierr.Errorf(
 							err,
-							"can't execute commands: %+v",
-							commands,
+							"can't execute chunk of commands: %+v",
+							chunk,
 						)
 						if cnt > 0 {
 							logger.Warning(e)
@@ -65,13 +69,16 @@ func (vk *VKClient) Run(chunks <-chan Commands) {
 							logger.Error(e)
 						}
 					}
-				}(commands)
+				}(chunk)
 			}
 		}
 	}()
 }
 
-func (vk *VKClient) execute(commands Commands) (error, int) {
+func (vk *VKClient) execute(
+	accessToken string,
+	commands VKCommands,
+) (error, int) {
 	total := len(commands)
 
 	logger.Debugf("sending execute request with %d commands", total)
@@ -92,8 +99,8 @@ func (vk *VKClient) execute(commands Commands) (error, int) {
 	}
 
 	query := request.URL.Query()
-	query.Add("access_token", vk.AccessToken)
-	query.Add("version", vk.Version)
+	query.Add("access_token", accessToken)
+	query.Add("version", vk.version)
 	request.URL.RawQuery = query.Encode()
 
 	response, err := vk.client.Do(request)
@@ -126,7 +133,7 @@ func (vk *VKClient) execute(commands Commands) (error, int) {
 	return e, total - failed
 }
 
-func compileCode(commands []Command) (string, error) {
+func compileCode(commands []VKCommand) (string, error) {
 	commandsCode := make([]string, len(commands))
 	for i, command := range commands {
 		b, err := json.Marshal(command.Args)

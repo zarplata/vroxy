@@ -16,10 +16,9 @@ func main() {
 Proxy server for balancing requests to VK API to avoid rate limiting.
 
 Usage:
-    vroxy (-t <token>) [options]
+    vroxy [options]
 
 Options:
-	-t --access-token <token>  VK access token.	
 	-l --listen <address>      HTTP listen address. [default: :8080]
 	-r --rps <rps>             Permissible VK API RPS. [default: 10]
 	-v --verbose               Logging in debug mode.
@@ -35,11 +34,6 @@ Options:
 
 	listen := arguments["--listen"].(string)
 
-	accessToken := arguments["--access-token"].(string)
-	if err != nil {
-		hierr.Fatalf(err, "unable to parse --access-token")
-	}
-
 	rps, err := strconv.Atoi(arguments["--rps"].(string))
 	if err != nil {
 		hierr.Fatalf(err, "unable to parse --rps")
@@ -48,10 +42,10 @@ Options:
 	queue := NewCommandsQueue(rps)
 	queue.Run()
 
-	vk := NewVKClient(accessToken, rps)
-	vk.Run(queue.Chunks)
+	vk := NewVKClient(rps)
+	vk.Run(queue.ChunksCh)
 
-	server := NewServer(queue.Commands, verbose)
+	server := NewServer(queue.CommandsCh, verbose)
 	server.Run(listen)
 }
 
