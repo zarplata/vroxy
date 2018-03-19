@@ -64,7 +64,10 @@ Options:
 	logger.Info("starting HTTP server")
 
 	server := NewServer(queue.CommandsCh, verbose)
-	server.Run(listen)
+	err = server.Run(listen)
+	if err != nil {
+		logger.Fatal(hierr.Errorf(err, "unable to start HTTP server"))
+	}
 }
 
 func setupLogger(verbose bool) *lorg.Log {

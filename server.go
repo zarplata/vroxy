@@ -23,9 +23,9 @@ func NewServer(commands chan<- VKCommand, verbose bool) *Server {
 	}
 }
 
-func (proxy *Server) Run(addr ...string) {
+func (proxy *Server) Run(addr ...string) error {
 	proxy.router.POST("/method/:name", proxy.handleMessagesSend)
-	proxy.router.Run(addr...)
+	return proxy.router.Run(addr...)
 }
 
 func (proxy *Server) handleMessagesSend(ctx *gin.Context) {
