@@ -1,0 +1,29 @@
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: docker.zp.s/concourse-arch
+    insecure_registries: [docker.zp.s]
+
+inputs:
+- name: source
+
+outputs:
+- name: package
+
+run:
+  path: sh
+  args:
+  - -c
+  - |
+    # hacking
+    chmod 4755 /usr/bin/sudo &&
+    chmod 777 /tmp &&
+    # env
+    chown -R concourse source &&
+    cd source &&
+    pacman -Sy --noconfirm &&
+    # build
+    su concourse -c "makepkg -s --noconfirm" &&
+    mv *.pkg.tar.xz ../package

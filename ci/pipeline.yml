@@ -1,0 +1,33 @@
+resource_types:
+- name: repod
+  type: docker-image
+  source:
+    repository: docker.zp.s/concourse-repod-resource
+    insecure_registries: [docker.zp.s]
+
+resources:
+- name: git-master
+  type: git
+  source:
+    uri: https://github.com/zarplata/vroxy.git
+    branch: master
+
+- name: arch-zp-stable
+  type: repod
+  source:
+    repository: arch-zp-stable
+
+jobs:
+- name: pkgbuild
+  public: true
+  plan:
+  - get: git-master
+    trigger: true
+    params:
+      submodules: none
+  - task: pkgbuild
+    file: git-master/ci/pkgbuild.yml
+    input_mapping: {source: git-master}
+  - put: arch-zp-stable
+    params:
+      file: package/vroxy-*.pkg.tar.xz
