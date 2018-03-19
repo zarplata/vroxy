@@ -22,11 +22,11 @@ Usage:
     vroxy [options]
 
 Options:
-	-l --listen <address>       HTTP listen address. [default: :8080]
-	-r --rps <rps>              Permissible VK API RPS. [default: 10]
-	-c --chunk-size	<count>     Chunk size. [default: 25]
+    -l --listen <address>       HTTP listen address. [default: :8080]
+    -r --rps <rps>              Permissible VK API RPS. [default: 10]
+    -c --chunk-size <count>     Chunk size. [default: 25]
     -a --api-version <version>  VK API version [default: 5.73]
-	-v --verbose                Logging in debug mode.
+    -v --verbose                Logging in debug mode.
 `
 
 	arguments, err := docopt.Parse(usage, nil, true, version, false)
