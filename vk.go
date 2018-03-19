@@ -29,7 +29,7 @@ type VKCommandsChunk struct {
 	Commands    []VKCommand
 }
 
-type ExecuteResponsePayload struct {
+type VKExecuteResponsePayload struct {
 	Response []interface{} `json:"response"`
 }
 
@@ -109,7 +109,7 @@ func (vk *VKClient) execute(
 		return hierr.Errorf(err, "can't read response body"), 0
 	}
 
-	payload := ExecuteResponsePayload{}
+	payload := VKExecuteResponsePayload{}
 	err = json.Unmarshal([]byte(content), &payload)
 	if err != nil {
 		return hierr.Errorf(err, "can't json unmarshal response body"), 0
@@ -145,7 +145,7 @@ func compileCode(commands []VKCommand) (string, error) {
 	return code, nil
 }
 
-func (payload *ExecuteResponsePayload) getFailed() int {
+func (payload *VKExecuteResponsePayload) getFailed() int {
 	cnt := 0
 	for _, id := range payload.Response {
 		switch id.(type) {
