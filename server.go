@@ -18,7 +18,7 @@ func NewServer(commands chan<- VKCommand, verbose bool) *Server {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	return &Server{
-		router:   gin.New(),
+		router:   gin.Default(),
 		commands: commands,
 	}
 }
