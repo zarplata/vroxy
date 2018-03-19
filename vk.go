@@ -33,7 +33,7 @@ type VKExecuteResponsePayload struct {
 	Response []interface{} `json:"response"`
 }
 
-func NewVKClient(rps int) *VKClient {
+func NewVKClient(rps int, version string) *VKClient {
 	client := &http.Client{Transport: &http.Transport{
 		MaxIdleConnsPerHost: rps * 2,
 		MaxIdleConns:        rps * 2,
@@ -41,7 +41,7 @@ func NewVKClient(rps int) *VKClient {
 
 	return &VKClient{
 		client:  client,
-		version: "5.73",
+		version: version,
 	}
 }
 

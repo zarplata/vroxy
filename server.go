@@ -38,7 +38,6 @@ func (proxy *Server) handleMessagesSend(ctx *gin.Context) {
 		)
 		return
 	}
-
 	request := ctx.Request
 	if err := request.ParseForm(); err != nil {
 		abort(
