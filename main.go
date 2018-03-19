@@ -50,12 +50,18 @@ Options:
 		hierr.Fatalf(err, "unable to parse --chunk-size")
 	}
 
+	logger.Info("starting VK commands queue")
+
 	queue := NewCommandsQueue(rps)
 	queue.ChunkSize = chunkSize
 	queue.Run()
 
+	logger.Info("starting VK client")
+
 	vk := NewVKClient(rps, version)
 	vk.Run(queue.ChunksCh)
+
+	logger.Info("starting HTTP server")
 
 	server := NewServer(queue.CommandsCh, verbose)
 	server.Run(listen)
