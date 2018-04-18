@@ -19,7 +19,7 @@ type VKClient struct {
 type VKCommand struct {
 	AccessToken string
 	Method      string
-	Args        interface{}
+	Payload     interface{}
 }
 
 type VKCommands []VKCommand
@@ -131,12 +131,12 @@ func (vk *VKClient) execute(
 func compileCode(commands []VKCommand) (string, error) {
 	commandsCode := make([]string, len(commands))
 	for i, command := range commands {
-		b, err := json.Marshal(command.Args)
+		b, err := json.Marshal(command.Payload)
 		if err != nil {
 			return "", hierr.Errorf(
 				err,
-				"can't marshal command args %+v",
-				command.Args,
+				"can't marshal command payload %+v",
+				command.Payload,
 			)
 		}
 		commandsCode[i] = fmt.Sprintf("%s(%s)", command.Method, string(b))

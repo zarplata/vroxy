@@ -53,10 +53,25 @@ func (proxy *Server) handleMessagesSend(ctx *gin.Context) {
 		return
 	}
 
+	payload := make(map[string]interface{})
+	for k, v := range request.Form {
+		if v == nil || k == "access_token" {
+			continue
+		}
+		switch len(v) {
+		case 0:
+			continue
+		case 1:
+			payload[k] = v[0]
+		case 2:
+			payload[k] = v
+		}
+	}
+
 	proxy.commands <- VKCommand{
 		AccessToken: accessToken,
 		Method:      fmt.Sprintf("API.%s", ctx.Param("name")),
-		Args:        request.Form,
+		Payload:     payload,
 	}
 	ctx.JSON(http.StatusOK, gin.H{"success": true})
 }
