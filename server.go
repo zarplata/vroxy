@@ -29,15 +29,6 @@ func (proxy *Server) Run(addr ...string) error {
 }
 
 func (proxy *Server) handleMessagesSend(ctx *gin.Context) {
-	accessToken := ctx.Query("access_token")
-	if accessToken == "" {
-		abort(
-			ctx,
-			http.StatusBadRequest,
-			errors.New("query `access_token` is required"),
-		)
-		return
-	}
 	request := ctx.Request
 	if err := request.ParseForm(); err != nil {
 		abort(
@@ -48,6 +39,20 @@ func (proxy *Server) handleMessagesSend(ctx *gin.Context) {
 		return
 	}
 	request.ParseMultipartForm(32 << 10) // 32 MB
+
+	accessToken := request.Form.Get("access_token")
+	if accessToken == "" {
+		accessToken = ctx.Query("access_token")
+	}
+	if accessToken == "" {
+		abort(
+			ctx,
+			http.StatusBadRequest,
+			errors.New("access_token is required"),
+		)
+		return
+	}
+
 	proxy.commands <- VKCommand{
 		AccessToken: accessToken,
 		Method:      fmt.Sprintf("API.%s", ctx.Param("name")),
