@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"bytes"
 )
 
 type VKClient struct {
@@ -131,7 +132,10 @@ func (vk *VKClient) execute(
 func compileCode(commands []VKCommand) (string, error) {
 	commandsCode := make([]string, len(commands))
 	for i, command := range commands {
-		b, err := json.Marshal(command.Payload)
+		buf := new(bytes.Buffer)
+		enc := json.NewEncoder(buf)
+		enc.SetEscapeHTML(false)
+		err := enc.Encode(command.Payload)
 		if err != nil {
 			return "", hierr.Errorf(
 				err,
@@ -139,7 +143,11 @@ func compileCode(commands []VKCommand) (string, error) {
 				command.Payload,
 			)
 		}
-		commandsCode[i] = fmt.Sprintf("%s(%s)", command.Method, string(b))
+		commandsCode[i] = fmt.Sprintf(
+			"%s(%s)",
+			command.Method,
+			string(buf.Bytes()),
+		)
 	}
 	code := fmt.Sprintf("return [%s];", strings.Join(commandsCode, ","))
 	return code, nil
