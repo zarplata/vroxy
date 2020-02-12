@@ -1,9 +1,9 @@
 vroxy
 =====
 
-Proxy server for balancing a requests to VK API to avoid rate limit exceeded.
+Proxy server for balancing requests to VK API to avoid rate limit exceeded.
 
-Requests grouping to chunks and sends every seconds using Execute
+Requests grouping to chunks and sends every second using `Execute`
 method without the habit of rate limitations.
 
 ## Requests
@@ -12,8 +12,8 @@ Requests are the same as the original requests except for the hostname.
 
 ## Responses
 
-Because the queue is used to deliver a requests, the proxy responses are
-very different from the original responses.
+The proxy response is different from the original one. Requests are queued and send 
+asynchronously to VK, and therefore it is not possible to provide original responses back.
 
 ### OK
 
